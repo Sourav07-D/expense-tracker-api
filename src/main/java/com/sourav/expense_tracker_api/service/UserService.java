@@ -1,5 +1,7 @@
 package com.sourav.expense_tracker_api.service;
 
+import com.sourav.expense_tracker_api.dto.UserRequestDTO;
+import com.sourav.expense_tracker_api.dto.UserResponseDTO;
 import com.sourav.expense_tracker_api.entity.User;
 import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +15,21 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User createUser(User user) {
+    public UserResponseDTO createUser(UserRequestDTO dto) {
 
-        user.setCreatedAt(LocalDateTime.now());
+        User user = User.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        return UserResponseDTO.builder()
+                .id(savedUser.getId())
+                .name(savedUser.getName())
+                .email(savedUser.getEmail())
+                .build();
     }
 }
