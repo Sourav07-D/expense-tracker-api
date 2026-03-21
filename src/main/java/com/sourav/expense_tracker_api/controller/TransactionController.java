@@ -1,7 +1,10 @@
 package com.sourav.expense_tracker_api.controller;
 
+import com.sourav.expense_tracker_api.dto.TransactionRequestDTO;
+import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
 import com.sourav.expense_tracker_api.entity.Transaction;
 import com.sourav.expense_tracker_api.service.TransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,14 +18,13 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/user/{userId}/category/{categoryId}")
-    public Transaction createTransaction(
+    public TransactionResponseDTO createTransaction(
             @PathVariable Long userId,
             @PathVariable Long categoryId,
-            @RequestBody Transaction transaction) {
+            @Valid @RequestBody TransactionRequestDTO dto) {
 
-        return transactionService.createTransaction(userId, categoryId, transaction);
+        return transactionService.createTransaction(userId, categoryId, dto);
     }
-
     @GetMapping
     public List<Transaction> getAllTransactions() {
         return transactionService.getAllTransactions();

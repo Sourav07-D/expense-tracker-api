@@ -1,7 +1,10 @@
 package com.sourav.expense_tracker_api.controller;
 
+import com.sourav.expense_tracker_api.dto.CategoryRequestDTO;
+import com.sourav.expense_tracker_api.dto.CategoryResponseDTO;
 import com.sourav.expense_tracker_api.entity.Category;
 import com.sourav.expense_tracker_api.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +18,11 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/user/{userId}")
-    public Category createCategory(
+    public CategoryResponseDTO createCategory(
             @PathVariable Long userId,
-            @RequestBody Category category) {
+            @Valid @RequestBody CategoryRequestDTO dto) {
 
-        return categoryService.createCategory(userId, category);
+        return categoryService.createCategory(userId, dto);
     }
 
     @GetMapping
