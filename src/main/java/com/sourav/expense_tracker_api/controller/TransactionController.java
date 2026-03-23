@@ -29,4 +29,24 @@ public class TransactionController {
     public List<Transaction> getAllTransactions() {
         return transactionService.getAllTransactions();
     }
+    @GetMapping("/user/{userId}")
+    public List<TransactionResponseDTO> getByUser(
+            @PathVariable Long userId) {
+
+        return transactionService.getTransactionsByUser(userId);
+    }
+    @GetMapping("/category/{categoryId}")
+    public List<TransactionResponseDTO> getByCategory(
+            @PathVariable Long categoryId) {
+
+        return transactionService.getByCategory(categoryId);
+    }
+    @GetMapping("/user/{userId}/category/{categoryId}")
+    public List<TransactionResponseDTO> getByUserAndCategory(
+            @PathVariable Long userId,
+            @PathVariable Long categoryId) {
+
+        return transactionService
+                .getByUserAndCategory(userId, categoryId);
+    }
 }

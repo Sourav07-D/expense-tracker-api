@@ -57,4 +57,44 @@ public class TransactionService {
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
+    public List<TransactionResponseDTO> getTransactionsByUser(Long userId) {
+
+        List<Transaction> transactions =
+                transactionRepository.findByUserId(userId);
+
+        return transactions.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+    public List<TransactionResponseDTO> getByCategory(Long categoryId) {
+
+        List<Transaction> transactions =
+                transactionRepository.findByCategoryId(categoryId);
+
+        return transactions.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+    public List<TransactionResponseDTO> getByUserAndCategory(
+            Long userId,
+            Long categoryId) {
+
+        List<Transaction> transactions =
+                transactionRepository
+                        .findByUserIdAndCategoryId(userId, categoryId);
+
+        return transactions.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+    private TransactionResponseDTO mapToDTO(Transaction t) {
+        return TransactionResponseDTO.builder()
+                .id(t.getId())
+                .amount(t.getAmount())
+                .description(t.getDescription())
+                .date(t.getDate())
+                .userId(t.getUser().getId())
+                .categoryId(t.getCategory().getId())
+                .build();
+    }
 }
