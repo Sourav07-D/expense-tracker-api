@@ -6,8 +6,10 @@ import com.sourav.expense_tracker_api.entity.Transaction;
 import com.sourav.expense_tracker_api.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -49,4 +51,13 @@ public class TransactionController {
         return transactionService
                 .getByUserAndCategory(userId, categoryId);
     }
+    @GetMapping("user/{userId}/date-range")
+    public List<TransactionResponseDTO> getByDateRange(
+            @PathVariable Long userId,
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end
+            ){
+        return transactionService.getByUserAndDataRange(userId,start,end);
+    }
+
 }

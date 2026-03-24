@@ -11,6 +11,7 @@ import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -54,6 +55,16 @@ public class TransactionService {
                 .build();
     }
 
+    private TransactionResponseDTO mapToDTO(Transaction t) {
+        return TransactionResponseDTO.builder()
+                .id(t.getId())
+                .amount(t.getAmount())
+                .description(t.getDescription())
+                .date(t.getDate())
+                .userId(t.getUser().getId())
+                .categoryId(t.getCategory().getId())
+                .build();
+    }
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
@@ -87,14 +98,12 @@ public class TransactionService {
                 .map(this::mapToDTO)
                 .toList();
     }
-    private TransactionResponseDTO mapToDTO(Transaction t) {
-        return TransactionResponseDTO.builder()
-                .id(t.getId())
-                .amount(t.getAmount())
-                .description(t.getDescription())
-                .date(t.getDate())
-                .userId(t.getUser().getId())
-                .categoryId(t.getCategory().getId())
-                .build();
+    public List<TransactionResponseDTO> getByUserAndDataRange(Long userId, LocalDate start,LocalDate end)
+    {
+        List<Transaction> transactions=transactionRepository.findByUserIdAndDateBetween(userId,start
+        ,end);
+        return transactions.stream()
+                .map(this:: mapToDTO)
+                .toList();
     }
 }
