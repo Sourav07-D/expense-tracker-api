@@ -59,5 +59,17 @@ public class TransactionController {
             ){
         return transactionService.getByUserAndDataRange(userId,start,end);
     }
+    @GetMapping("/user/{userId}/total-expense")
+    public Double getTotalExpense(@PathVariable Long userId)
+    {
+        return  transactionService.getTotalExpense(userId);
+    }
+    @GetMapping("/user/{userId}/total-expense/date-range")
+    public Double getTotalExpenseByDateRange(@PathVariable Long userId,
+                                             @RequestParam LocalDate start,
+                                             @RequestParam LocalDate end)
+    {
+        return transactionService.getTotalExpenseByDateRange(userId,start,end);
+    }
 
 }

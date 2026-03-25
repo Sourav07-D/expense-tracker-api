@@ -106,4 +106,13 @@ public class TransactionService {
                 .map(this:: mapToDTO)
                 .toList();
     }
+    public double getTotalExpense(Long userId)
+    {
+        return transactionRepository.getTotalExpenseByUserId(userId);
+    }
+    public double getTotalExpenseByDateRange(Long userId,LocalDate start,LocalDate end)
+    {
+        return transactionRepository.getTotalExpenseByUserIdAndDateRange(userId,start,end);
+    }
+
 }
