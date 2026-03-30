@@ -4,6 +4,7 @@ import com.sourav.expense_tracker_api.dto.CategoryRequestDTO;
 import com.sourav.expense_tracker_api.dto.CategoryResponseDTO;
 import com.sourav.expense_tracker_api.entity.Category;
 import com.sourav.expense_tracker_api.entity.User;
+import com.sourav.expense_tracker_api.exception.ResourceNotFoundException;
 import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class CategoryService {
                                               CategoryRequestDTO dto) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Category category = Category.builder()
                 .name(dto.getName())
@@ -40,8 +41,17 @@ public class CategoryService {
                 .userId(userId)
                 .build();
     }
+
+    public List<Category> getCategoriesByUser(Long userId) {
+
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return categoryRepository.findByUserId(userId);
+    }
 public List<Category> getAllCategories()
 {
+
     return categoryRepository.findAll();
 }
 }

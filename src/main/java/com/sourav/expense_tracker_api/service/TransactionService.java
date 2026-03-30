@@ -5,6 +5,7 @@ import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
 import com.sourav.expense_tracker_api.entity.Category;
 import com.sourav.expense_tracker_api.entity.Transaction;
 import com.sourav.expense_tracker_api.entity.User;
+import com.sourav.expense_tracker_api.exception.ResourceNotFoundException;
 import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.TransactionRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
@@ -29,10 +30,10 @@ public class TransactionService {
             TransactionRequestDTO dto) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         Transaction transaction = Transaction.builder()
                 .amount(dto.getAmount())
@@ -69,7 +70,8 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
     public List<TransactionResponseDTO> getTransactionsByUser(Long userId) {
-
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         List<Transaction> transactions =
                 transactionRepository.findByUserId(userId);
 
@@ -78,7 +80,8 @@ public class TransactionService {
                 .toList();
     }
     public List<TransactionResponseDTO> getByCategory(Long categoryId) {
-
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         List<Transaction> transactions =
                 transactionRepository.findByCategoryId(categoryId);
 
@@ -89,6 +92,12 @@ public class TransactionService {
     public List<TransactionResponseDTO> getByUserAndCategory(
             Long userId,
             Long categoryId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
 
         List<Transaction> transactions =
                 transactionRepository
@@ -100,6 +109,8 @@ public class TransactionService {
     }
     public List<TransactionResponseDTO> getByUserAndDataRange(Long userId, LocalDate start,LocalDate end)
     {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         List<Transaction> transactions=transactionRepository.findByUserIdAndDateBetween(userId,start
         ,end);
         return transactions.stream()
@@ -108,10 +119,16 @@ public class TransactionService {
     }
     public double getTotalExpense(Long userId)
     {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         return transactionRepository.getTotalExpenseByUserId(userId);
     }
     public double getTotalExpenseByDateRange(Long userId,LocalDate start,LocalDate end)
     {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         return transactionRepository.getTotalExpenseByUserIdAndDateRange(userId,start,end);
     }
 
