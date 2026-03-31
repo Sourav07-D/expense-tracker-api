@@ -15,5 +15,6 @@ public class TransactionRequestDTO {
     private String description;
 
     @NotNull(message = "Date is required")
+    @PastOrPresent(message = "Date cannot be in future")
     private LocalDate date;
 }
