@@ -10,6 +10,8 @@ import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.TransactionRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -66,18 +68,17 @@ public class TransactionService {
                 .categoryId(t.getCategory().getId())
                 .build();
     }
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+    public Page<TransactionResponseDTO> getAllTransactions(Pageable pageable) {
+     Page<Transaction> transactions=transactionRepository.findAll(pageable);
+     return transactions.map(this::mapToDTO);
     }
-    public List<TransactionResponseDTO> getTransactionsByUser(Long userId) {
+    public Page<TransactionResponseDTO> getTransactionsByUser(Long userId,Pageable pageable) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<Transaction> transactions =
-                transactionRepository.findByUserId(userId);
+        Page<Transaction> transactions =
+                transactionRepository.findByUserId(userId,pageable);
 
-        return transactions.stream()
-                .map(this::mapToDTO)
-                .toList();
+        return transactions.map(this::mapToDTO);
     }
     public List<TransactionResponseDTO> getByCategory(Long categoryId) {
         categoryRepository.findById(categoryId)

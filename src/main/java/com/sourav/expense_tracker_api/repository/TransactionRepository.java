@@ -1,6 +1,8 @@
 package com.sourav.expense_tracker_api.repository;
 
 import com.sourav.expense_tracker_api.entity.Transaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -9,9 +11,10 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    List<Transaction> findByUserId(Long userId);
+    //List<Transaction> findByUserId(Long userId);
 
     List<Transaction> findByCategoryId(Long categoryId);
+    Page<Transaction> findByUserId(Long userId, Pageable pageable);
 
     List<Transaction> findByUserIdAndCategoryId(Long userId, Long categoryId);
     List<Transaction> findByUserIdAndDateBetween(Long userId, LocalDate startDate,LocalDate endDate);

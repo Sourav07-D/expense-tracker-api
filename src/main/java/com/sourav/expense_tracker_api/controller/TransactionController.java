@@ -7,6 +7,8 @@ import com.sourav.expense_tracker_api.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -28,14 +30,14 @@ public class TransactionController {
         return transactionService.createTransaction(userId, categoryId, dto);
     }
     @GetMapping
-    public List<Transaction> getAllTransactions() {
-        return transactionService.getAllTransactions();
+    public Page<TransactionResponseDTO> getAllTransactions(Pageable pageable) {
+        return transactionService.getAllTransactions(pageable);
     }
     @GetMapping("/user/{userId}")
-    public List<TransactionResponseDTO> getByUser(
-            @PathVariable Long userId) {
+    public Page<TransactionResponseDTO> getByUser(
+            @PathVariable Long userId,Pageable pageable) {
 
-        return transactionService.getTransactionsByUser(userId);
+        return transactionService.getTransactionsByUser(userId,pageable);
     }
     @GetMapping("/category/{categoryId}")
     public List<TransactionResponseDTO> getByCategory(
