@@ -1,5 +1,6 @@
 package com.sourav.expense_tracker_api.repository;
 
+import com.sourav.expense_tracker_api.dto.CategorySummaryDTO;
 import com.sourav.expense_tracker_api.entity.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,5 +33,16 @@ AND t.date BETWEEN :start AND :end
             Long userId,
             LocalDate start,
             LocalDate end);
+
+    @Query("""
+SELECT new com.sourav.expense_tracker_api.dto.CategorySummaryDTO(
+    t.category.id,
+    SUM(t.amount)
+)
+FROM Transaction t
+WHERE t.user.id = :userId
+GROUP BY t.category.id
+""")
+    List<CategorySummaryDTO> getCategorySummary(Long userId);
 
 }

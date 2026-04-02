@@ -1,5 +1,6 @@
 package com.sourav.expense_tracker_api.controller;
 
+import com.sourav.expense_tracker_api.dto.CategorySummaryDTO;
 import com.sourav.expense_tracker_api.dto.TransactionRequestDTO;
 import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
 import com.sourav.expense_tracker_api.entity.Transaction;
@@ -72,6 +73,12 @@ public class TransactionController {
                                              @RequestParam LocalDate end)
     {
         return transactionService.getTotalExpenseByDateRange(userId,start,end);
+    }
+
+    @GetMapping("/user/{userId}/category-summary")
+    public List<CategorySummaryDTO> getCategorySummary(@PathVariable Long userId)
+    {
+        return transactionService.getCategorySummary(userId);
     }
 
 }

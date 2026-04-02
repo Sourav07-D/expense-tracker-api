@@ -1,5 +1,6 @@
 package com.sourav.expense_tracker_api.service;
 
+import com.sourav.expense_tracker_api.dto.CategorySummaryDTO;
 import com.sourav.expense_tracker_api.dto.TransactionRequestDTO;
 import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
 import com.sourav.expense_tracker_api.entity.Category;
@@ -131,6 +132,12 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return transactionRepository.getTotalExpenseByUserIdAndDateRange(userId,start,end);
+    }
+    public List<CategorySummaryDTO> getCategorySummary(Long userId)
+    {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return transactionRepository.getCategorySummary(userId);
     }
 
 }
