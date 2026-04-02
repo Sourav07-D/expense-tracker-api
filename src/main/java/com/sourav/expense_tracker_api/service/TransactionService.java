@@ -1,6 +1,7 @@
 package com.sourav.expense_tracker_api.service;
 
 import com.sourav.expense_tracker_api.dto.CategorySummaryDTO;
+import com.sourav.expense_tracker_api.dto.TopCategoryDTO;
 import com.sourav.expense_tracker_api.dto.TransactionRequestDTO;
 import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
 import com.sourav.expense_tracker_api.entity.Category;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.ToLongFunction;
 
 @Service
 @RequiredArgsConstructor
@@ -139,5 +141,17 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return transactionRepository.getCategorySummary(userId);
     }
+    public TopCategoryDTO getTopCategory(Long userId)
+    {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+         List<TopCategoryDTO> list=transactionRepository.findTopCategory(userId);
+         if(list.isEmpty())
+         {
+             return null;
+         }
+         return list.get(0);
+    }
+
 
 }
