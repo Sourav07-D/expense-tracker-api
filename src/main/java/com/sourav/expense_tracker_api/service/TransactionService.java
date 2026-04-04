@@ -12,6 +12,8 @@ import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.TransactionRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,17 +30,27 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private static final Logger log =
+            LoggerFactory.getLogger(TransactionService.class);
 
     public TransactionResponseDTO createTransaction(
             Long userId,
             Long categoryId,
             TransactionRequestDTO dto) {
 
+        log.info("Creating transaction for userId={} categoryId={}", userId, categoryId);
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    log.error("User not found with id={}", userId);
+                    return new ResourceNotFoundException("User not found");
+                });
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> {
+                    log.error("Category not found with id={}", categoryId);
+                    return new ResourceNotFoundException("Category not found");
+                });
 
         Transaction transaction = Transaction.builder()
                 .amount(dto.getAmount())
@@ -51,14 +63,9 @@ public class TransactionService {
 
         Transaction saved = transactionRepository.save(transaction);
 
-        return TransactionResponseDTO.builder()
-                .id(saved.getId())
-                .amount(saved.getAmount())
-                .description(saved.getDescription())
-                .date(saved.getDate())
-                .userId(userId)
-                .categoryId(categoryId)
-                .build();
+        log.info("Transaction created successfully with id={}", saved.getId());
+
+        return mapToDTO(saved);
     }
 
     private TransactionResponseDTO mapToDTO(Transaction t) {
@@ -75,11 +82,24 @@ public class TransactionService {
      Page<Transaction> transactions=transactionRepository.findAll(pageable);
      return transactions.map(this::mapToDTO);
     }
-    public Page<TransactionResponseDTO> getTransactionsByUser(Long userId,Pageable pageable) {
+
+    public Page<TransactionResponseDTO> getTransactionsByUser(
+            Long userId,
+            Pageable pageable) {
+
+        log.info("Fetching transactions for userId={} page={} size={}",
+                userId, pageable.getPageNumber(), pageable.getPageSize());
+
         userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    log.error("User not found with id={}", userId);
+                    return new ResourceNotFoundException("User not found");
+                });
+
         Page<Transaction> transactions =
-                transactionRepository.findByUserId(userId,pageable);
+                transactionRepository.findByUserId(userId, pageable);
+
+        log.info("Fetched {} transactions", transactions.getNumberOfElements());
 
         return transactions.map(this::mapToDTO);
     }
