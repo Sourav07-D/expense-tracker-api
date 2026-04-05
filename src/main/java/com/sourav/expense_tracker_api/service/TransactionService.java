@@ -8,6 +8,7 @@ import com.sourav.expense_tracker_api.entity.Category;
 import com.sourav.expense_tracker_api.entity.Transaction;
 import com.sourav.expense_tracker_api.entity.User;
 import com.sourav.expense_tracker_api.exception.ResourceNotFoundException;
+import com.sourav.expense_tracker_api.mapper.TransactionMapper;
 import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.TransactionRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
@@ -65,22 +66,13 @@ public class TransactionService {
 
         log.info("Transaction created successfully with id={}", saved.getId());
 
-        return mapToDTO(saved);
+        return TransactionMapper.toDTO(saved);
     }
 
-    private TransactionResponseDTO mapToDTO(Transaction t) {
-        return TransactionResponseDTO.builder()
-                .id(t.getId())
-                .amount(t.getAmount())
-                .description(t.getDescription())
-                .date(t.getDate())
-                .userId(t.getUser().getId())
-                .categoryId(t.getCategory().getId())
-                .build();
-    }
+
     public Page<TransactionResponseDTO> getAllTransactions(Pageable pageable) {
      Page<Transaction> transactions=transactionRepository.findAll(pageable);
-     return transactions.map(this::mapToDTO);
+     return transactions.map(TransactionMapper::toDTO);
     }
 
     public Page<TransactionResponseDTO> getTransactionsByUser(
@@ -101,7 +93,7 @@ public class TransactionService {
 
         log.info("Fetched {} transactions", transactions.getNumberOfElements());
 
-        return transactions.map(this::mapToDTO);
+        return transactions.map(TransactionMapper::toDTO);
     }
     public List<TransactionResponseDTO> getByCategory(Long categoryId) {
         categoryRepository.findById(categoryId)
@@ -110,7 +102,7 @@ public class TransactionService {
                 transactionRepository.findByCategoryId(categoryId);
 
         return transactions.stream()
-                .map(this::mapToDTO)
+                .map(TransactionMapper::toDTO)
                 .toList();
     }
     public List<TransactionResponseDTO> getByUserAndCategory(
@@ -128,7 +120,7 @@ public class TransactionService {
                         .findByUserIdAndCategoryId(userId, categoryId);
 
         return transactions.stream()
-                .map(this::mapToDTO)
+                .map(TransactionMapper::toDTO)
                 .toList();
     }
     public List<TransactionResponseDTO> getByUserAndDataRange(Long userId, LocalDate start,LocalDate end)
@@ -138,7 +130,7 @@ public class TransactionService {
         List<Transaction> transactions=transactionRepository.findByUserIdAndDateBetween(userId,start
         ,end);
         return transactions.stream()
-                .map(this:: mapToDTO)
+                .map(TransactionMapper::toDTO)
                 .toList();
     }
     public double getTotalExpense(Long userId)

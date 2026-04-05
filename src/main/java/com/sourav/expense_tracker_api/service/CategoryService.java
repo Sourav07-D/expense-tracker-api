@@ -5,6 +5,7 @@ import com.sourav.expense_tracker_api.dto.CategoryResponseDTO;
 import com.sourav.expense_tracker_api.entity.Category;
 import com.sourav.expense_tracker_api.entity.User;
 import com.sourav.expense_tracker_api.exception.ResourceNotFoundException;
+import com.sourav.expense_tracker_api.mapper.CategoryMapper;
 import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +36,7 @@ public class CategoryService {
 
         Category saved = categoryRepository.save(category);
 
-        return CategoryResponseDTO.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .userId(userId)
-                .build();
+        return CategoryMapper.toDTO(saved);
     }
 
     public List<Category> getCategoriesByUser(Long userId) {
