@@ -1,9 +1,6 @@
 package com.sourav.expense_tracker_api.controller;
 
-import com.sourav.expense_tracker_api.dto.CategorySummaryDTO;
-import com.sourav.expense_tracker_api.dto.TopCategoryDTO;
-import com.sourav.expense_tracker_api.dto.TransactionRequestDTO;
-import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
+import com.sourav.expense_tracker_api.dto.*;
 import com.sourav.expense_tracker_api.entity.Transaction;
 import com.sourav.expense_tracker_api.service.TransactionService;
 import jakarta.validation.Valid;
@@ -36,10 +33,15 @@ public class TransactionController {
         return transactionService.getAllTransactions(pageable);
     }
     @GetMapping("/user/{userId}")
-    public Page<TransactionResponseDTO> getByUser(
-            @PathVariable Long userId,Pageable pageable) {
+    public ApiResponse<?> getByUser(
+            @PathVariable Long userId,
+            Pageable pageable) {
 
-        return transactionService.getTransactionsByUser(userId,pageable);
+        return ApiResponse.builder()
+                .success(true)
+                .message("Transactions fetched successfully")
+                .data(transactionService.getTransactionsByUser(userId, pageable))
+                .build();
     }
     @GetMapping("/category/{categoryId}")
     public List<TransactionResponseDTO> getByCategory(
@@ -63,10 +65,15 @@ public class TransactionController {
             ){
         return transactionService.getByUserAndDataRange(userId,start,end);
     }
+
     @GetMapping("/user/{userId}/total-expense")
-    public Double getTotalExpense(@PathVariable Long userId)
-    {
-        return  transactionService.getTotalExpense(userId);
+    public ApiResponse<?> getTotalExpense(@PathVariable Long userId) {
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Total expense fetched successfully")
+                .data(transactionService.getTotalExpense(userId))
+                .build();
     }
     @GetMapping("/user/{userId}/total-expense/date-range")
     public Double getTotalExpenseByDateRange(@PathVariable Long userId,
@@ -76,10 +83,15 @@ public class TransactionController {
         return transactionService.getTotalExpenseByDateRange(userId,start,end);
     }
 
+
     @GetMapping("/user/{userId}/category-summary")
-    public List<CategorySummaryDTO> getCategorySummary(@PathVariable Long userId)
-    {
-        return transactionService.getCategorySummary(userId);
+    public ApiResponse<?> getCategorySummary(@PathVariable Long userId) {
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Category summary fetched successfully")
+                .data(transactionService.getCategorySummary(userId))
+                .build();
     }
     @GetMapping("user/{userId}/top-category")
     public TopCategoryDTO getTopCategory(@PathVariable Long userId)

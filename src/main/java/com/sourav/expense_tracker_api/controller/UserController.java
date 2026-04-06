@@ -1,5 +1,6 @@
 package com.sourav.expense_tracker_api.controller;
 
+import com.sourav.expense_tracker_api.dto.ApiResponse;
 import com.sourav.expense_tracker_api.dto.UserRequestDTO;
 import com.sourav.expense_tracker_api.dto.UserResponseDTO;
 import com.sourav.expense_tracker_api.entity.User;
@@ -15,8 +16,14 @@ public class UserController {
 
     private final UserService userService;
 
+
     @PostMapping
-    public UserResponseDTO createUser(@Valid @RequestBody UserRequestDTO dto) {
-        return userService.createUser(dto);
+    public ApiResponse<?> createUser(@Valid @RequestBody UserRequestDTO dto) {
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("User created successfully")
+                .data(userService.createUser(dto))
+                .build();
     }
 }
