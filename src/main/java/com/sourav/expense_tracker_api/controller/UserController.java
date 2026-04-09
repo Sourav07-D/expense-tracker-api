@@ -26,4 +26,13 @@ public class UserController {
                 .data(userService.createUser(dto))
                 .build();
     }
+    @GetMapping
+    public ApiResponse<?> getAllUsers() {
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Users fetched successfully")
+                .data(userService.getAllUsers())
+                .build();
+    }
 }
