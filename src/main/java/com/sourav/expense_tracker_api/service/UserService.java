@@ -2,6 +2,7 @@ package com.sourav.expense_tracker_api.service;
 
 import com.sourav.expense_tracker_api.dto.UserRequestDTO;
 import com.sourav.expense_tracker_api.dto.UserResponseDTO;
+import com.sourav.expense_tracker_api.entity.Role;
 import com.sourav.expense_tracker_api.entity.User;
 import com.sourav.expense_tracker_api.mapper.UserMapper;
 import com.sourav.expense_tracker_api.repository.UserRepository;
@@ -25,6 +26,7 @@ public class UserService {
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .build();
 

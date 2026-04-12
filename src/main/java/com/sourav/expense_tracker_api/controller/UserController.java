@@ -7,6 +7,7 @@ import com.sourav.expense_tracker_api.entity.User;
 import com.sourav.expense_tracker_api.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +28,7 @@ public class UserController {
                 .build();
     }
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> getAllUsers() {
 
         return ApiResponse.builder()
