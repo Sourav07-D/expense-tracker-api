@@ -53,6 +53,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGeneric(Exception ex) {
 
+        // 🔥 VERY IMPORTANT: Let Spring Security handle these
+        if (ex instanceof org.springframework.security.access.AccessDeniedException) {
+            throw (org.springframework.security.access.AccessDeniedException) ex;
+        }
+
+        if (ex instanceof org.springframework.security.core.AuthenticationException) {
+            throw (org.springframework.security.core.AuthenticationException) ex;
+        }
+
+        log.error("Unhandled exception: ", ex); // good practice
+
         return ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())

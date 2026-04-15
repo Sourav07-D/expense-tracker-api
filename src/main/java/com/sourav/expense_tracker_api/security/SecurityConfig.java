@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final JwtAuthenticationEntryPoint authEntryPoint;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -26,8 +28,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/users").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authEntryPoint) // 🔥 401
+                        .accessDeniedHandler(accessDeniedHandler) // 🔥 403
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
