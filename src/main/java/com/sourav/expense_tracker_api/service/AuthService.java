@@ -27,14 +27,17 @@ public class AuthService {
         }
 
 
-        String token = jwtService.generateToken(
+        String accessToken = jwtService.generateToken(
                 user.getEmail(),
                 user.getRole().name()
         );
 
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+
         return AuthResponseDTO.builder()
                 .message("Login successful")
-                .token(token) // 🔥 NEW
+                .token(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }
