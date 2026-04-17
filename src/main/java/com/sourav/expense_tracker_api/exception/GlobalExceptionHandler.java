@@ -82,4 +82,15 @@ public class GlobalExceptionHandler {
                 .message(ex.getMessage())
                 .build();
     }
+    @ExceptionHandler(AccountBlockedException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ErrorResponse handleAccountBlocked(AccountBlockedException ex) {
+
+        return ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                .error("ACCOUNT_BLOCKED")
+                .message(ex.getMessage())
+                .build();
+    }
 }
