@@ -15,6 +15,7 @@ import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -133,10 +134,19 @@ public class TransactionService {
                 .map(TransactionMapper::toDTO)
                 .toList();
     }
-    public double getTotalExpense(Long userId)
-    {
+//    public double getTotalExpense(Long userId)
+//    {
+//        userRepository.findById(userId)
+//                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+//
+//        return transactionRepository.getTotalExpenseByUserId(userId);
+//    }
+    @Cacheable(value = "totalExpense", key = "#userId")
+    public double getTotalExpense(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        System.out.println("🔥 Fetching from DB...");
 
         return transactionRepository.getTotalExpenseByUserId(userId);
     }
