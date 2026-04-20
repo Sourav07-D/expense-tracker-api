@@ -99,4 +99,28 @@ public class TransactionController {
         return  transactionService.getTopCategory(userId);
     }
 
+    // ✅ ADD THIS
+
+    @PutMapping("/{transactionId}/user/{userId}")
+    public TransactionResponseDTO updateTransaction(
+            @PathVariable Long transactionId,
+            @PathVariable Long userId,
+            @Valid @RequestBody TransactionRequestDTO dto) {
+
+        return transactionService.updateTransaction(userId, transactionId, dto);
+    }
+
+    @DeleteMapping("/{transactionId}/user/{userId}")
+    public ApiResponse<?> deleteTransaction(
+            @PathVariable Long transactionId,
+            @PathVariable Long userId) {
+
+        transactionService.deleteTransaction(userId, transactionId);
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Transaction deleted successfully")
+                .build();
+    }
+
 }

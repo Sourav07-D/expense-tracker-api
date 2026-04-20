@@ -15,7 +15,9 @@ import com.sourav.expense_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,9 +34,20 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+
     private static final Logger log =
             LoggerFactory.getLogger(TransactionService.class);
 
+    // ============================
+    // CREATE TRANSACTION
+    // ============================
+
+    @Caching(evict = {
+            // ✅ FIX: Proper cache key format (was inconsistent before)
+            @CacheEvict(value = "totalExpense", key = "'user:' + #userId"),
+            @CacheEvict(value = "categorySummary", key = "'user:' + #userId"),
+            @CacheEvict(value = "totalExpenseByDate", allEntries = true) // multiple combinations
+    })
     public TransactionResponseDTO createTransaction(
             Long userId,
             Long categoryId,
@@ -70,10 +83,13 @@ public class TransactionService {
         return TransactionMapper.toDTO(saved);
     }
 
+    // ============================
+    // READ OPERATIONS
+    // ============================
 
     public Page<TransactionResponseDTO> getAllTransactions(Pageable pageable) {
-     Page<Transaction> transactions=transactionRepository.findAll(pageable);
-     return transactions.map(TransactionMapper::toDTO);
+        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        return transactions.map(TransactionMapper::toDTO);
     }
 
     public Page<TransactionResponseDTO> getTransactionsByUser(
@@ -96,9 +112,11 @@ public class TransactionService {
 
         return transactions.map(TransactionMapper::toDTO);
     }
+
     public List<TransactionResponseDTO> getByCategory(Long categoryId) {
         categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
         List<Transaction> transactions =
                 transactionRepository.findByCategoryId(categoryId);
 
@@ -106,15 +124,16 @@ public class TransactionService {
                 .map(TransactionMapper::toDTO)
                 .toList();
     }
+
     public List<TransactionResponseDTO> getByUserAndCategory(
             Long userId,
             Long categoryId) {
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
 
         List<Transaction> transactions =
                 transactionRepository
@@ -124,56 +143,150 @@ public class TransactionService {
                 .map(TransactionMapper::toDTO)
                 .toList();
     }
-    public List<TransactionResponseDTO> getByUserAndDataRange(Long userId, LocalDate start,LocalDate end)
-    {
+
+    public List<TransactionResponseDTO> getByUserAndDataRange(
+            Long userId,
+            LocalDate start,
+            LocalDate end) {
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<Transaction> transactions=transactionRepository.findByUserIdAndDateBetween(userId,start
-        ,end);
+
+        List<Transaction> transactions =
+                transactionRepository.findByUserIdAndDateBetween(userId, start, end);
+
         return transactions.stream()
                 .map(TransactionMapper::toDTO)
                 .toList();
     }
-//    public double getTotalExpense(Long userId)
-//    {
-//        userRepository.findById(userId)
-//                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-//
-//        return transactionRepository.getTotalExpenseByUserId(userId);
-//    }
-    @Cacheable(value = "totalExpense", key = "#userId")
+
+    // ============================
+    // CACHED METHODS (FIXED)
+    // ============================
+
+    @Cacheable(
+            value = "totalExpense",
+            key = "'user:' + #userId" // ✅ FIXED (was "#userId")
+    )
     public double getTotalExpense(Long userId) {
+
+        log.info("Fetching total expense for userId={} from DB", userId);
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        System.out.println("🔥 Fetching from DB...");
 
         return transactionRepository.getTotalExpenseByUserId(userId);
     }
-    public double getTotalExpenseByDateRange(Long userId,LocalDate start,LocalDate end)
-    {
+
+    @Cacheable(
+            value = "totalExpenseByDate",
+            key = "'user:' + #userId + ':start:' + #start + ':end:' + #end" // ✅ FIXED KEY
+    )
+    public double getTotalExpenseByDateRange(
+            Long userId,
+            LocalDate start,
+            LocalDate end) {
+
+        log.info("Fetching date range expense from DB for userId={}", userId);
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        return transactionRepository.getTotalExpenseByUserIdAndDateRange(userId,start,end);
+        return transactionRepository
+                .getTotalExpenseByUserIdAndDateRange(userId, start, end);
     }
-    public List<CategorySummaryDTO> getCategorySummary(Long userId)
-    {
+
+    @Cacheable(
+            value = "categorySummary",
+            key = "'user:' + #userId" // ✅ FIXED
+    )
+    public List<CategorySummaryDTO> getCategorySummary(Long userId) {
+
+        log.info("Fetching category summary from DB for userId={}", userId);
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         return transactionRepository.getCategorySummary(userId);
     }
-    public TopCategoryDTO getTopCategory(Long userId)
-    {
+
+    public TopCategoryDTO getTopCategory(Long userId) {
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-         List<TopCategoryDTO> list=transactionRepository.findTopCategory(userId);
-         if(list.isEmpty())
-         {
-             return null;
-         }
-         return list.get(0);
+
+        List<TopCategoryDTO> list =
+                transactionRepository.findTopCategory(userId);
+
+        return list.isEmpty() ? null : list.get(0);
     }
 
+    // ============================
+    // UPDATE TRANSACTION
+    // ============================
 
+    @Caching(evict = {
+            @CacheEvict(value = "totalExpense", key = "'user:' + #userId"),
+            @CacheEvict(value = "categorySummary", key = "'user:' + #userId"),
+            @CacheEvict(value = "totalExpenseByDate", allEntries = true)
+    })
+    public TransactionResponseDTO updateTransaction(
+            Long userId,
+            Long transactionId,
+            TransactionRequestDTO dto) {
+
+        log.info("Updating transactionId={} for userId={}", transactionId, userId);
+
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> {
+                    log.error("Transaction not found id={}", transactionId);
+                    return new ResourceNotFoundException("Transaction not found");
+                });
+
+        // ✅ SECURITY CHECK
+        if (!transaction.getUser().getId().equals(userId)) {
+            log.error("Unauthorized update attempt userId={}", userId);
+            throw new RuntimeException("Unauthorized");
+        }
+
+        transaction.setAmount(dto.getAmount());
+        transaction.setDescription(dto.getDescription());
+        transaction.setDate(dto.getDate());
+
+        Transaction updated = transactionRepository.save(transaction);
+
+        log.info("Transaction updated successfully id={}", updated.getId());
+
+        return TransactionMapper.toDTO(updated);
+    }
+
+    // ============================
+    // DELETE TRANSACTION
+    // ============================
+
+    @Caching(evict = {
+            @CacheEvict(value = "totalExpense", key = "'user:' + #userId"),
+            @CacheEvict(value = "categorySummary", key = "'user:' + #userId"),
+            @CacheEvict(value = "totalExpenseByDate", allEntries = true)
+    })
+    public void deleteTransaction(Long userId, Long transactionId) {
+
+        log.info("Deleting transactionId={} for userId={}", transactionId, userId);
+
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> {
+                    log.error("Transaction not found id={}", transactionId);
+                    return new ResourceNotFoundException("Transaction not found");
+                });
+
+        // ✅ SECURITY CHECK
+        if (!transaction.getUser().getId().equals(userId)) {
+            log.error("Unauthorized delete attempt userId={}", userId);
+            throw new RuntimeException("Unauthorized");
+        }
+
+        transactionRepository.delete(transaction);
+
+        log.info("Transaction deleted successfully id={}", transactionId);
+    }
 }
