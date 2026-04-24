@@ -17,7 +17,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByCategoryId(Long categoryId);
 
-    Page<Transaction> findByUserId(Long userId, Pageable pageable);
+   // Page<Transaction> findByUserId(Long userId, Pageable pageable);
+   @Query("""
+            SELECT t FROM Transaction t
+            JOIN FETCH t.category
+            JOIN FETCH t.user
+            WHERE t.user.id = :userId
+            """)
+   List<Transaction> findByUserIdWithRelations(Long userId);
+
+    @Query("SELECT t.id FROM Transaction t WHERE t.user.id = :userId")
+    Page<Long> findIdsByUserId(Long userId, Pageable pageable);
+    @Query("""
+            SELECT t FROM Transaction t
+            JOIN FETCH t.category
+            JOIN FETCH t.user
+            WHERE t.id IN :ids
+            """)
+    List<Transaction> findByIdsWithRelations(List<Long> ids);
 
     List<Transaction> findByUserIdAndCategoryId(Long userId, Long categoryId);
 
@@ -45,15 +62,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
 
     @Query("""
-        SELECT new com.sourav.expense_tracker_api.dto.CategorySummaryDTO(
-            c.name,
-            SUM(t.amount)
-        )
-        FROM Transaction t
-        JOIN t.category c
-        WHERE t.user.id = :userId
-        GROUP BY c.name
-        """)
+SELECT new com.sourav.expense_tracker_api.dto.CategorySummaryDTO(
+    c.id,
+    COALESCE(SUM(t.amount), 0)
+)
+FROM Transaction t
+JOIN t.category c
+WHERE t.user.id = :userId
+GROUP BY c.id
+""")
     List<CategorySummaryDTO> getCategorySummary(Long userId);
 
 

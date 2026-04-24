@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -105,12 +106,16 @@ public class TransactionService {
                     return new ResourceNotFoundException("User not found");
                 });
 
-        Page<Transaction> transactions =
-                transactionRepository.findByUserId(userId, pageable);
+        Page<Long> idsPage = transactionRepository.findIdsByUserId(userId, pageable);
 
-        log.info("Fetched {} transactions", transactions.getNumberOfElements());
+        List<Transaction> transactions =
+                transactionRepository.findByIdsWithRelations(idsPage.getContent());
 
-        return transactions.map(TransactionMapper::toDTO);
+        return new PageImpl<>(
+                transactions.stream().map(TransactionMapper::toDTO).toList(),
+                pageable,
+                idsPage.getTotalElements()
+        );
     }
 
     public List<TransactionResponseDTO> getByCategory(Long categoryId) {

@@ -1,12 +1,14 @@
 package com.sourav.expense_tracker_api.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor   // ✅ this already creates constructor
+@NoArgsConstructor
+@Builder
 public class CategorySummaryDTO {
+
     private Long categoryId;
-    private double totalAmount;
+    private Double totalAmount;
 }
