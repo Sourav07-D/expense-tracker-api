@@ -23,8 +23,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByUserIdAndDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user.id = :userId")
-    Double getTotalExpenseByUserId(Long userId);
+
+
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+            """)
+    double getTotalExpenseByUserId(Long userId);
 
     @Query("""
             SELECT COALESCE(SUM(t.amount), 0)
@@ -37,15 +43,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             LocalDate start,
             LocalDate end);
 
+
     @Query("""
-            SELECT new com.sourav.expense_tracker_api.dto.CategorySummaryDTO(
-                t.category.id,
-                SUM(t.amount)
-            )
-            FROM Transaction t
-            WHERE t.user.id = :userId
-            GROUP BY t.category.id
-            """)
+        SELECT new com.sourav.expense_tracker_api.dto.CategorySummaryDTO(
+            c.name,
+            SUM(t.amount)
+        )
+        FROM Transaction t
+        JOIN t.category c
+        WHERE t.user.id = :userId
+        GROUP BY c.name
+        """)
     List<CategorySummaryDTO> getCategorySummary(Long userId);
 
 
