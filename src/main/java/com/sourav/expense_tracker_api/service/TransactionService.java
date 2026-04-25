@@ -1,9 +1,6 @@
 package com.sourav.expense_tracker_api.service;
 
-import com.sourav.expense_tracker_api.dto.CategorySummaryDTO;
-import com.sourav.expense_tracker_api.dto.TopCategoryDTO;
-import com.sourav.expense_tracker_api.dto.TransactionRequestDTO;
-import com.sourav.expense_tracker_api.dto.TransactionResponseDTO;
+import com.sourav.expense_tracker_api.dto.*;
 import com.sourav.expense_tracker_api.entity.Category;
 import com.sourav.expense_tracker_api.entity.Transaction;
 import com.sourav.expense_tracker_api.entity.User;
@@ -12,6 +9,7 @@ import com.sourav.expense_tracker_api.mapper.TransactionMapper;
 import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.TransactionRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
+import com.sourav.expense_tracker_api.specification.TransactionSpecification;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +19,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -293,5 +292,20 @@ public class TransactionService {
         transactionRepository.delete(transaction);
 
         log.info("Transaction deleted successfully id={}", transactionId);
+    }
+
+    public Page<TransactionResponseDTO> filterTransactions(
+            TransactionFilterDTO filter,
+            Pageable pageable) {
+
+        log.info("Filtering transactions with dynamic filters");
+
+        Specification<Transaction> spec =
+                TransactionSpecification.filter(filter);
+
+        Page<Transaction> page =
+                transactionRepository.findAll(spec, pageable);
+
+        return page.map(TransactionMapper::toDTO);
     }
 }

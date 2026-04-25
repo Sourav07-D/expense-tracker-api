@@ -123,4 +123,12 @@ public class TransactionController {
                 .build();
     }
 
+    @PostMapping("/filter")
+    public Page<TransactionResponseDTO> filterTransactions(
+            @RequestBody TransactionFilterDTO filter,
+            Pageable pageable) {
+
+        return transactionService.filterTransactions(filter, pageable);
+    }
+
 }
