@@ -10,15 +10,14 @@ import com.sourav.expense_tracker_api.repository.CategoryRepository;
 import com.sourav.expense_tracker_api.repository.TransactionRepository;
 import com.sourav.expense_tracker_api.repository.UserRepository;
 import com.sourav.expense_tracker_api.specification.TransactionSpecification;
+import com.sourav.expense_tracker_api.util.SortValidator;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -298,13 +297,22 @@ public class TransactionService {
             TransactionFilterDTO filter,
             Pageable pageable) {
 
-        log.info("Filtering transactions with dynamic filters");
+        log.info("Filtering transactions with pagination + sorting");
+
+        // ✅ Validate sort fields
+        Sort validatedSort = SortValidator.validate(pageable.getSort());
+
+        Pageable newPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                validatedSort
+        );
 
         Specification<Transaction> spec =
                 TransactionSpecification.filter(filter);
 
         Page<Transaction> page =
-                transactionRepository.findAll(spec, pageable);
+                transactionRepository.findAll(spec, newPageable);
 
         return page.map(TransactionMapper::toDTO);
     }
